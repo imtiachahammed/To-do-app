@@ -1,6 +1,6 @@
 // =============================================
 //   AuraithX — High-Tech Welcome Intro
-//   Works on Desktop, Android, iOS
+//   Fixed version — works on Desktop, Android, iOS
 // =============================================
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -20,8 +20,6 @@ document.addEventListener('DOMContentLoaded', function () {
       overflow: hidden;
       font-family: 'Orbitron', monospace;
     }
-
-    /* Grid background */
     #ax-intro::before {
       content: '';
       position: absolute;
@@ -32,30 +30,22 @@ document.addEventListener('DOMContentLoaded', function () {
       background-size: 40px 40px;
       animation: ax-grid-fade 3s ease forwards;
     }
-
     @keyframes ax-grid-fade {
       0%   { opacity: 0; }
       30%  { opacity: 1; }
       85%  { opacity: 1; }
       100% { opacity: 0; }
     }
-
-    /* Scanlines */
     #ax-intro::after {
       content: '';
       position: absolute;
       inset: 0;
       background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(0,0,0,0.1) 2px,
-        rgba(0,0,0,0.1) 4px
+        0deg, transparent, transparent 2px,
+        rgba(0,0,0,0.1) 2px, rgba(0,0,0,0.1) 4px
       );
       pointer-events: none;
     }
-
-    /* Corner brackets */
     .ax-corner {
       position: absolute;
       width: 32px;
@@ -63,27 +53,21 @@ document.addEventListener('DOMContentLoaded', function () {
       opacity: 0;
       animation: ax-corner-in 0.5s ease forwards;
     }
-    .ax-corner.tl { top: 24px; left: 24px; border-top: 2px solid #00f5ff; border-left: 2px solid #00f5ff; animation-delay: 0.1s; }
-    .ax-corner.tr { top: 24px; right: 24px; border-top: 2px solid #00f5ff; border-right: 2px solid #00f5ff; animation-delay: 0.2s; }
-    .ax-corner.bl { bottom: 24px; left: 24px; border-bottom: 2px solid #00f5ff; border-left: 2px solid #00f5ff; animation-delay: 0.3s; }
-    .ax-corner.br { bottom: 24px; right: 24px; border-bottom: 2px solid #00f5ff; border-right: 2px solid #00f5ff; animation-delay: 0.4s; }
-
+    .ax-corner.tl { top:24px; left:24px; border-top:2px solid #00f5ff; border-left:2px solid #00f5ff; animation-delay:0.1s; }
+    .ax-corner.tr { top:24px; right:24px; border-top:2px solid #00f5ff; border-right:2px solid #00f5ff; animation-delay:0.2s; }
+    .ax-corner.bl { bottom:24px; left:24px; border-bottom:2px solid #00f5ff; border-left:2px solid #00f5ff; animation-delay:0.3s; }
+    .ax-corner.br { bottom:24px; right:24px; border-bottom:2px solid #00f5ff; border-right:2px solid #00f5ff; animation-delay:0.4s; }
     @keyframes ax-corner-in {
-      from { opacity: 0; transform: scale(0.5); }
-      to   { opacity: 1; transform: scale(1); }
+      from { opacity:0; transform:scale(0.5); }
+      to   { opacity:1; transform:scale(1); }
     }
-
-    /* Center content */
     .ax-center {
       position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0;
       z-index: 2;
     }
-
-    /* Hex ring */
     .ax-ring {
       width: 120px;
       height: 120px;
@@ -91,23 +75,19 @@ document.addEventListener('DOMContentLoaded', function () {
       margin-bottom: 28px;
       animation: ax-ring-in 0.6s ease 0.3s both;
     }
-
     @keyframes ax-ring-in {
-      from { opacity: 0; transform: scale(0.4) rotate(-90deg); }
-      to   { opacity: 1; transform: scale(1) rotate(0deg); }
+      from { opacity:0; transform:scale(0.4) rotate(-90deg); }
+      to   { opacity:1; transform:scale(1) rotate(0deg); }
     }
-
     .ax-ring svg {
       width: 100%;
       height: 100%;
       animation: ax-ring-spin 8s linear infinite;
     }
-
     @keyframes ax-ring-spin {
       from { transform: rotate(0deg); }
       to   { transform: rotate(360deg); }
     }
-
     .ax-ring-inner {
       position: absolute;
       inset: 20px;
@@ -118,7 +98,6 @@ document.addEventListener('DOMContentLoaded', function () {
       justify-content: center;
       animation: ax-ring-spin 4s linear infinite reverse;
     }
-
     .ax-ring-core {
       width: 36px;
       height: 36px;
@@ -127,14 +106,12 @@ document.addEventListener('DOMContentLoaded', function () {
       box-shadow: 0 0 20px rgba(0,245,255,0.8), 0 0 40px rgba(0,245,255,0.4);
       animation: ax-core-pulse 1.5s ease-in-out infinite;
     }
-
     @keyframes ax-core-pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50%       { transform: scale(1.2); opacity: 0.7; }
+      0%,100% { transform:scale(1); opacity:1; }
+      50%      { transform:scale(1.2); opacity:0.7; }
     }
-
-    /* Brand name */
     .ax-brand {
+      font-family: 'Orbitron', monospace;
       font-size: clamp(1.8rem, 6vw, 3rem);
       font-weight: 900;
       letter-spacing: 8px;
@@ -144,13 +121,10 @@ document.addEventListener('DOMContentLoaded', function () {
       animation: ax-brand-in 0.7s ease 0.8s forwards;
       text-transform: uppercase;
     }
-
     @keyframes ax-brand-in {
-      from { opacity: 0; letter-spacing: 20px; filter: blur(8px); }
-      to   { opacity: 1; letter-spacing: 8px;  filter: blur(0); }
+      from { opacity:0; letter-spacing:20px; filter:blur(8px); }
+      to   { opacity:1; letter-spacing:8px;  filter:blur(0); }
     }
-
-    /* Subtitle */
     .ax-sub {
       font-family: 'Share Tech Mono', monospace;
       font-size: clamp(0.55rem, 2vw, 0.7rem);
@@ -161,13 +135,10 @@ document.addEventListener('DOMContentLoaded', function () {
       opacity: 0;
       animation: ax-fade-up 0.6s ease 1.3s forwards;
     }
-
     @keyframes ax-fade-up {
-      from { opacity: 0; transform: translateY(10px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from { opacity:0; transform:translateY(10px); }
+      to   { opacity:1; transform:translateY(0); }
     }
-
-    /* Divider line */
     .ax-divider {
       width: 0;
       height: 1px;
@@ -175,13 +146,10 @@ document.addEventListener('DOMContentLoaded', function () {
       margin: 20px 0;
       animation: ax-line-grow 0.8s ease 1.5s forwards;
     }
-
     @keyframes ax-line-grow {
-      from { width: 0; opacity: 0; }
-      to   { width: 240px; opacity: 1; }
+      from { width:0; opacity:0; }
+      to   { width:240px; opacity:1; }
     }
-
-    /* Boot text */
     .ax-boot {
       font-family: 'Share Tech Mono', monospace;
       font-size: clamp(0.6rem, 2vw, 0.72rem);
@@ -192,8 +160,6 @@ document.addEventListener('DOMContentLoaded', function () {
       opacity: 0;
       animation: ax-fade-up 0.4s ease 1.8s forwards;
     }
-
-    /* Progress bar */
     .ax-progress-wrap {
       width: 240px;
       height: 2px;
@@ -204,7 +170,6 @@ document.addEventListener('DOMContentLoaded', function () {
       opacity: 0;
       animation: ax-fade-up 0.4s ease 1.9s forwards;
     }
-
     .ax-progress-bar {
       height: 100%;
       width: 0%;
@@ -213,8 +178,6 @@ document.addEventListener('DOMContentLoaded', function () {
       box-shadow: 0 0 8px rgba(0,245,255,0.6);
       transition: width 0.12s linear;
     }
-
-    /* System tags */
     .ax-tags {
       display: flex;
       gap: 12px;
@@ -222,7 +185,6 @@ document.addEventListener('DOMContentLoaded', function () {
       opacity: 0;
       animation: ax-fade-up 0.4s ease 2s forwards;
     }
-
     .ax-tag {
       font-family: 'Share Tech Mono', monospace;
       font-size: 0.55rem;
@@ -233,8 +195,6 @@ document.addEventListener('DOMContentLoaded', function () {
       color: rgba(0,245,255,0.4);
       text-transform: uppercase;
     }
-
-    /* Exit flash */
     .ax-flash {
       position: absolute;
       inset: 0;
@@ -242,25 +202,20 @@ document.addEventListener('DOMContentLoaded', function () {
       opacity: 0;
       pointer-events: none;
     }
-
     .ax-flash.active {
       animation: ax-flash-out 0.5s ease forwards;
     }
-
     @keyframes ax-flash-out {
       0%   { opacity: 0.6; }
       100% { opacity: 0; }
     }
-
-    /* Whole overlay exit */
     #ax-intro.ax-exit {
       animation: ax-intro-exit 0.6s ease forwards;
     }
-
     @keyframes ax-intro-exit {
-      0%   { opacity: 1; transform: scale(1); }
-      40%  { opacity: 1; transform: scale(1.03); }
-      100% { opacity: 0; transform: scale(0.96); pointer-events: none; }
+      0%   { opacity:1; transform:scale(1); }
+      40%  { opacity:1; transform:scale(1.03); }
+      100% { opacity:0; transform:scale(0.96); pointer-events:none; }
     }
   `;
   document.head.appendChild(style);
@@ -273,7 +228,6 @@ document.addEventListener('DOMContentLoaded', function () {
     <div class="ax-corner tr"></div>
     <div class="ax-corner bl"></div>
     <div class="ax-corner br"></div>
-
     <div class="ax-center">
       <div class="ax-ring">
         <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -297,36 +251,25 @@ document.addEventListener('DOMContentLoaded', function () {
           <div class="ax-ring-core"></div>
         </div>
       </div>
-
       <div class="ax-brand">AuraithX</div>
       <div class="ax-sub">Task Management System</div>
-
       <div class="ax-divider"></div>
-
       <div class="ax-boot" id="ax-boot-text">INITIALIZING...</div>
-
       <div class="ax-progress-wrap">
         <div class="ax-progress-bar" id="ax-bar"></div>
       </div>
-
       <div class="ax-tags">
         <div class="ax-tag">PWA</div>
         <div class="ax-tag">Offline</div>
         <div class="ax-tag">v2.0.0</div>
       </div>
     </div>
-
     <div class="ax-flash" id="ax-flash"></div>
   `;
-  if (document.body) {
-    document.body.appendChild(overlay);
-  } else {
-    document.addEventListener('DOMContentLoaded', () => {
-      document.body.appendChild(overlay);
-    });
-  }
 
-  // ---- Boot sequence text ----
+  document.body.appendChild(overlay);
+
+  // ---- Boot sequence ----
   const bootLines = [
     'INITIALIZING SYSTEM...',
     'LOADING MODULES...',
@@ -336,20 +279,18 @@ document.addEventListener('DOMContentLoaded', function () {
   ];
 
   const bootEl = document.getElementById('ax-boot-text');
-  const bar     = document.getElementById('ax-bar');
-  const flash   = document.getElementById('ax-flash');
+  const bar    = document.getElementById('ax-bar');
+  const flash  = document.getElementById('ax-flash');
 
   let lineIndex = 0;
-  const totalDuration = 2200; // ms for progress bar to fill
-  const startTime = Date.now() + 2000; // start after intro animations
+  const totalDuration = 2200;
+  const startTime = Date.now() + 2000;
 
-  // Animate progress bar
   function animateBar() {
     const elapsed = Date.now() - startTime;
     const pct = Math.min((elapsed / totalDuration) * 100, 100);
     bar.style.width = pct + '%';
 
-    // Update boot text at intervals
     const expectedLine = Math.floor((pct / 100) * (bootLines.length - 1));
     if (expectedLine !== lineIndex && expectedLine < bootLines.length) {
       lineIndex = expectedLine;
@@ -360,7 +301,6 @@ document.addEventListener('DOMContentLoaded', function () {
       requestAnimationFrame(animateBar);
     } else {
       bootEl.textContent = bootLines[bootLines.length - 1];
-      // Flash and exit
       setTimeout(() => {
         flash.classList.add('active');
         setTimeout(() => {
@@ -374,7 +314,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  // Start bar after intro animations settle
   setTimeout(() => requestAnimationFrame(animateBar), 2000);
 
 });
