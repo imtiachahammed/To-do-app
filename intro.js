@@ -3,7 +3,7 @@
 //   Works on Desktop, Android, iOS
 // =============================================
 
-(function () {
+document.addEventListener('DOMContentLoaded', function () {
 
   // ---- Inject Styles ----
   const style = document.createElement('style');
@@ -377,4 +377,4 @@
   // Start bar after intro animations settle
   setTimeout(() => requestAnimationFrame(animateBar), 2000);
 
-})();
+});
