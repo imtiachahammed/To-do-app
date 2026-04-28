@@ -1,61 +1,25 @@
 {
+  "id": "/To-do-app/",
   "name": "AuraithX Todo List",
   "short_name": "AuraithX Todo",
-  "description": "A smart daily todo list powered by AuraithX",
-  "start_url": "./index.html",
+  "description": "A smart daily todo list powered by AuraithX. Manage your tasks offline with a fast, beautiful Progressive Web App.",
+  "start_url": "/To-do-app/index.html",
+  "scope": "/To-do-app/",
   "display": "standalone",
-  "background_color": "#667eea",
-  "theme_color": "#4e54c8",
   "orientation": "portrait",
-  "scope": "./",
+  "background_color": "#0f0f1e",
+  "theme_color": "#4e54c8",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["productivity", "utilities"],
   "icons": [
-    {
-      "src": "icons/icon-72x72.png",
-      "sizes": "72x72",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "icons/icon-96x96.png",
-      "sizes": "96x96",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "icons/icon-128x128.png",
-      "sizes": "128x128",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "icons/icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "icons/icon-152x152.png",
-      "sizes": "152x152",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "icons/icon-384x384.png",
-      "sizes": "384x384",
-      "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "icons/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable any"
-    }
+    { "src": "To%20do%20list/Icon/launchericon-48x48.png",   "sizes": "48x48",   "type": "image/png", "purpose": "any" },
+    { "src": "To%20do%20list/Icon/launchericon-72x72.png",   "sizes": "72x72",   "type": "image/png", "purpose": "any" },
+    { "src": "To%20do%20list/Icon/launchericon-96x96.png",   "sizes": "96x96",   "type": "image/png", "purpose": "any" },
+    { "src": "To%20do%20list/Icon/launchericon-144x144.png", "sizes": "144x144", "type": "image/png", "purpose": "any" },
+    { "src": "To%20do%20list/Icon/launchericon-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "To%20do%20list/Icon/launchericon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "To%20do%20list/Icon/launchericon-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "To%20do%20list/Icon/launchericon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
