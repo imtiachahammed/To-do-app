@@ -318,13 +318,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     <div class="ax-flash" id="ax-flash"></div>
   `;
-  if (document.body) {
-    document.body.appendChild(overlay);
-  } else {
-    document.addEventListener('DOMContentLoaded', () => {
-      document.body.appendChild(overlay);
-    });
-  }
+  document.body.appendChild(overlay);
 
   // ---- Boot sequence text ----
   const bootLines = [
