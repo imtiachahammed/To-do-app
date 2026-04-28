@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraithX // Todo System</title>
+
+    <!-- PWA META TAGS -->
+    <meta name="description" content="A smart daily todo list powered by AuraithX">
+    <meta name="theme-color" content="#00f5ff">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AuraithX Todo">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-152x152.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+
+    <!-- Fonts (needed by intro.js too) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Intro runs immediately before anything renders -->
+    <script src="intro.js"></script>
+</head>
+<body>
+
+    <div class="header-bar"></div>
+    <h1>AuraithX</h1>
+    <h2>Task Management System</h2>
+    <p>Double-click any task to edit. Enter to add.</p>
+
+    <div class="status-badge">
+      <div class="status-dot"></div>
+      SYSTEM ONLINE // LOCAL STORAGE ACTIVE
+    </div>
+
+    <div class="input-row">
+      <input type="text" id="todo-input" placeholder="// Enter new task..." autocomplete="off">
+      <button id="add-btn">+ ADD</button>
+    </div>
+
+    <ol id="todo-list"></ol>
+
+    <div class="footer-line">
+      POWERED BY <span>AURAITHX</span> // v2.0.0
+    </div>
+
+    <script src="script.js"></script>
+
+    <!-- Service Worker -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('[AuraithX] SW registered:', reg.scope))
+            .catch(err => console.error('[AuraithX] SW failed:', err));
+        });
+      }
+    </script>
+
+</body>
+</html>

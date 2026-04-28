@@ -1,0 +1,424 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600&display=swap');
+
+/* ============================================================
+   AURAITHX TODO — FUTURISTIC CYBER UI
+   ============================================================ */
+
+:root {
+  --cyan:       #00f5ff;
+  --cyan-dim:   #00b8cc;
+  --cyan-glow:  rgba(0, 245, 255, 0.18);
+  --cyan-faint: rgba(0, 245, 255, 0.06);
+  --purple:     #b042ff;
+  --purple-dim: #7a2db8;
+  --purple-glow:rgba(176, 66, 255, 0.18);
+  --bg-deep:    #040812;
+  --bg-panel:   #070e1c;
+  --bg-card:    #0a1628;
+  --bg-hover:   #0f1f3a;
+  --border:     rgba(0, 245, 255, 0.2);
+  --border-hot: rgba(0, 245, 255, 0.55);
+  --text-hi:    #e8f8ff;
+  --text-mid:   #7ab8cc;
+  --text-dim:   #3a6070;
+  --red:        #ff3c5a;
+  --green:      #00ff88;
+}
+
+/* ---- Reset ---- */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ---- Body / Background ---- */
+body {
+  background-color: var(--bg-deep);
+  background-image:
+    linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px),
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(176,66,255,0.12), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 110%, rgba(0,245,255,0.08), transparent);
+  background-size: 40px 40px, 40px 40px, 100% 100%, 100% 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 60px 20px 80px;
+  font-family: 'Rajdhani', sans-serif;
+  color: var(--text-hi);
+}
+
+/* ---- Scanline overlay ---- */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.07) 2px,
+    rgba(0,0,0,0.07) 4px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+body > * { position: relative; z-index: 1; }
+
+/* ---- Header Bar ---- */
+.header-bar {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.header-bar::before,
+.header-bar::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cyan-dim));
+}
+
+.header-bar::after {
+  background: linear-gradient(90deg, var(--cyan-dim), transparent);
+}
+
+/* ---- Titles ---- */
+h1 {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--cyan);
+  text-shadow: 0 0 20px rgba(0,245,255,0.6), 0 0 40px rgba(0,245,255,0.25);
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+h2 {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.65rem;
+  font-weight: 400;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: var(--purple);
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+p {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+p::before { content: '> '; color: var(--cyan-dim); }
+
+/* ---- Status Badge ---- */
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--text-mid);
+  letter-spacing: 1.5px;
+  margin-bottom: 28px;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green), 0 0 16px var(--green);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(0.7); }
+}
+
+/* ---- Input Row ---- */
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 480px;
+  margin-bottom: 28px;
+}
+
+#todo-input {
+  flex: 1;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  outline: none;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  color: var(--text-hi);
+  caret-color: var(--cyan);
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  position: relative;
+}
+
+#todo-input::placeholder {
+  color: var(--text-dim);
+  font-size: 0.75rem;
+}
+
+#todo-input:focus {
+  border-color: var(--cyan);
+  background: var(--bg-hover);
+  box-shadow: 0 0 0 1px var(--cyan-dim),
+              0 0 16px var(--cyan-glow),
+              inset 0 0 12px var(--cyan-faint);
+}
+
+/* ---- Add Button ---- */
+#add-btn {
+  padding: 12px 22px;
+  background: transparent;
+  border: 1px solid var(--cyan-dim);
+  border-radius: 4px;
+  color: var(--cyan);
+  font-family: 'Orbitron', monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+#add-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--cyan-glow), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+#add-btn:hover {
+  border-color: var(--cyan);
+  color: var(--bg-deep);
+  background: var(--cyan);
+  box-shadow: 0 0 20px var(--cyan-glow), 0 0 40px var(--cyan-glow);
+  text-shadow: none;
+}
+
+#add-btn:hover::before { opacity: 1; }
+
+#add-btn:active { transform: scale(0.97); }
+
+/* ---- Panel / List Container ---- */
+#todo-list {
+  list-style: none;
+  width: 100%;
+  max-width: 480px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* ---- Corner Bracket decoration ---- */
+#todo-list::before {
+  content: '[ TASK_QUEUE ]';
+  display: block;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+  padding: 0 2px;
+}
+
+/* ---- Each Todo Item ---- */
+#todo-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--cyan-dim);
+  border-radius: 4px;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  animation: slide-in 0.3s ease forwards;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Shimmer line on hover */
+#todo-list li::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0,245,255,0.04), transparent);
+  transition: left 0.4s ease;
+}
+
+#todo-list li:hover::after { left: 150%; }
+
+#todo-list li:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-hot);
+  border-left-color: var(--cyan);
+  box-shadow: 0 0 12px var(--cyan-glow), inset 0 0 8px var(--cyan-faint);
+}
+
+@keyframes slide-in {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ---- Checkbox ---- */
+#todo-list input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--cyan-dim);
+  border-radius: 2px;
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  transition: all 0.2s;
+}
+
+#todo-list input[type="checkbox"]:checked {
+  background: var(--cyan);
+  border-color: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan-glow);
+}
+
+#todo-list input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 4px; top: 1px;
+  width: 5px; height: 9px;
+  border: 2px solid var(--bg-deep);
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
+}
+
+/* ---- Task ID prefix ---- */
+#todo-list li .task-id {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  flex-shrink: 0;
+}
+
+/* ---- Todo Span ---- */
+#todo-list span {
+  flex: 1;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  color: var(--text-hi);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+#todo-list span:hover { color: var(--cyan); }
+
+/* ---- Completed state ---- */
+#todo-list li.completed {
+  border-left-color: var(--text-dim);
+  opacity: 0.55;
+}
+
+#todo-list li.completed span {
+  text-decoration: line-through;
+  color: var(--text-dim);
+}
+
+#todo-list input[type="checkbox"]:checked + .task-id + span,
+#todo-list input[type="checkbox"]:checked ~ span {
+  text-decoration: line-through;
+  color: var(--text-dim);
+}
+
+/* ---- Delete Button ---- */
+#todo-list button {
+  background: transparent;
+  border: 1px solid rgba(255,60,90,0.3);
+  border-radius: 3px;
+  color: rgba(255,60,90,0.6);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 1px;
+  padding: 5px 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+
+#todo-list button:hover {
+  background: rgba(255,60,90,0.12);
+  border-color: var(--red);
+  color: var(--red);
+  box-shadow: 0 0 10px rgba(255,60,90,0.25);
+}
+
+/* ---- Empty State ---- */
+#todo-list:empty::after {
+  content: '// NO ACTIVE TASKS IN QUEUE';
+  display: block;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+  padding: 24px 0;
+  text-align: center;
+}
+
+/* ---- Footer line ---- */
+.footer-line {
+  margin-top: 36px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+.footer-line span { color: var(--purple); }
+
+/* ---- Responsive ---- */
+@media (max-width: 480px) {
+  body { padding: 40px 14px 60px; }
+  h1 { font-size: 1.1rem; letter-spacing: 3px; }
+  .input-row { flex-wrap: wrap; }
+  #todo-input { min-width: 0; }
+  #add-btn { width: 100%; }
+}
