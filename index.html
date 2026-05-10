@@ -21,44 +21,50 @@
 <body>
 
   <!-- ===== SIDEBAR ===== -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo">
-      <div class="logo-ring"></div>
-      <span class="logo-text">AuraithX</span>
-    </div>
+<aside class="sidebar" id="sidebar">
+  <!-- ADD close button -->
+  <button class="sidebar-close" onclick="closeSidebar()" aria-label="Close menu">✕</button>
 
-    <nav class="sidebar-nav">
-      <button class="nav-btn active" data-view="tasks" onclick="switchView('tasks')">
-        <span class="nav-icon">⬡</span> TASKS
-      </button>
-      <button class="nav-btn" data-view="analytics" onclick="switchView('analytics')">
-        <span class="nav-icon">◈</span> ANALYTICS
-      </button>
-    </nav>
+  <div class="sidebar-logo">
+    <div class="logo-ring"></div>
+    <span class="logo-text">AuraithX</span>
+  </div>
 
-    <div class="sidebar-filters">
-      <div class="filter-label">// FILTER</div>
-      <button class="filter-btn active" onclick="setFilter('all',this)">ALL</button>
-      <button class="filter-btn" onclick="setFilter('high',this)">🔴 HIGH</button>
-      <button class="filter-btn" onclick="setFilter('medium',this)">🟡 MEDIUM</button>
-      <button class="filter-btn" onclick="setFilter('low',this)">🟢 LOW</button>
-      <button class="filter-btn" onclick="setFilter('done',this)">✓ DONE</button>
-      <button class="filter-btn" onclick="setFilter('overdue',this)">⚠ OVERDUE</button>
-    </div>
+  <nav class="sidebar-nav">
+    <button class="nav-btn active" data-view="tasks" onclick="switchView('tasks')">
+      <span class="nav-icon">⬡</span> TASKS
+    </button>
+    <button class="nav-btn" data-view="analytics" onclick="switchView('analytics')">
+      <span class="nav-icon">◈</span> ANALYTICS
+    </button>
+  </nav>
 
-    <div class="sidebar-cats">
-      <div class="filter-label">// CATEGORY</div>
-      <div id="cat-list"></div>
-    </div>
+  <div class="sidebar-filters">
+    <div class="filter-label">// FILTER</div>
+    <button class="filter-btn active" onclick="setFilter('all',this)">ALL</button>
+    <button class="filter-btn" onclick="setFilter('high',this)">🔴 HIGH</button>
+    <button class="filter-btn" onclick="setFilter('medium',this)">🟡 MEDIUM</button>
+    <button class="filter-btn" onclick="setFilter('low',this)">🟢 LOW</button>
+    <button class="filter-btn" onclick="setFilter('done',this)">✓ DONE</button>
+    <button class="filter-btn" onclick="setFilter('overdue',this)">⚠ OVERDUE</button>
+  </div>
 
-    <div class="sidebar-status">
-      <div class="status-dot-wrap">
-        <div class="status-dot"></div>
-        <span>SYSTEM ONLINE</span>
-      </div>
-      <div class="ver-tag">v2.0.0</div>
+  <div class="sidebar-cats">
+    <div class="filter-label">// CATEGORY</div>
+    <div id="cat-list"></div>
+  </div>
+
+  <div class="sidebar-status">
+    <div class="status-dot-wrap">
+      <div class="status-dot"></div>
+      <span>SYSTEM ONLINE</span>
     </div>
-  </aside>
+    <div class="ver-tag">v2.0.0</div>
+  </div>
+</aside>
+
+<!-- ADD backdrop (sibling after sidebar so .sidebar.open ~ .sidebar-backdrop works) -->
+<div class="sidebar-backdrop" onclick="closeSidebar()"></div>
 
   <!-- ===== MAIN ===== -->
   <main class="main" id="main">
