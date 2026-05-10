@@ -1,24 +1,25 @@
 // =============================================
-//   AuraithX Task OS — script.js v2.0
-//   Built on your original v1 code
-//   Added: priorities, categories, due dates,
-//          notifications, analytics, search, filter
+//   AuraithX Task OS — script.js v2.1 FIXED
+//   Fixes: task list not showing, notifications,
+//          countdown cleanup, sidebar on Android
 // =============================================
 
 let todos = [];
 let currentFilter = 'all';
 let currentCatFilter = 'all';
 let notifPermission = false;
-let notifTimers = {};
+let notifTimers = {};      // setTimeout IDs for notifications
+let countdownTimers = {};  // setInterval IDs for countdowns
 
-// ---- Load from localStorage (migrates v1 data too) ----
+// =============================================
+//   LOAD DATA (with v1 migration)
+// =============================================
 const savedV2 = localStorage.getItem('ax-todos-v2');
 const savedV1 = localStorage.getItem('todos');
 
 if (savedV2) {
   todos = JSON.parse(savedV2);
 } else if (savedV1) {
-  // Migrate old v1 todos into v2 format
   const old = JSON.parse(savedV1);
   todos = old.map(t => ({
     id:        t.id || genId(),
@@ -44,19 +45,35 @@ function genId() {
 //   CLOCK
 // =============================================
 function updateClock() {
-  const now = new Date();
-  const h = String(now.getHours()).padStart(2, '0');
-  const m = String(now.getMinutes()).padStart(2, '0');
-  const s = String(now.getSeconds()).padStart(2, '0');
   const el = document.getElementById('clock');
-  if (el) el.textContent = `${h}:${m}:${s}`;
+  if (!el) return;
+  const now = new Date();
+  el.textContent =
+    String(now.getHours()).padStart(2,'0') + ':' +
+    String(now.getMinutes()).padStart(2,'0') + ':' +
+    String(now.getSeconds()).padStart(2,'0');
 }
 setInterval(updateClock, 1000);
 updateClock();
 
 // =============================================
-//   NOTIFICATIONS
+//   NOTIFICATIONS — using Service Worker
+//   (required for Android PWA)
 // =============================================
+function showSWNotification(title, body, tag) {
+  if (!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.ready.then(reg => {
+    reg.showNotification(title, {
+      body,
+      tag,
+      icon:             './To%20do%20list/Icon/launchericon-192x192.png',
+      badge:            './To%20do%20list/Icon/launchericon-192x192.png',
+      requireInteraction: true,
+      vibrate:          [200, 100, 200]
+    });
+  }).catch(console.error);
+}
+
 function requestNotifPermission() {
   if (!('Notification' in window)) {
     alert('This browser does not support notifications.');
@@ -76,23 +93,12 @@ function requestNotifPermission() {
 }
 
 function scheduleAllNotifs() {
-  Object.values(notifTimers).forEach(clearTimeout);
-  notifTimers = {};
-  let countdownTimers = new Map();
-
-function showSWNotification(title, options = {}, tag = '') {
-  if (!('serviceWorker' in navigator)) return;
-  navigator.serviceWorker.ready
-    .then((reg) => {
-      reg.showNotification(title, {
-        tag,
-        icon: './To%20do%20list/Icon/launchericon-192x192.png',
-        badge: './To%20do%20list/Icon/launchericon-192x192.png',
-        ...options
-      });
-    })
-    .catch(console.error);
-}
+  // Clear all existing notification timers
+  Object.keys(notifTimers).forEach(k => {
+    clearTimeout(notifTimers[k]);
+    delete notifTimers[k];
+  });
+  // Re-schedule for all pending todos
   todos.forEach(todo => {
     if (!todo.completed && todo.dueDate) scheduleNotif(todo);
   });
@@ -100,48 +106,45 @@ function showSWNotification(title, options = {}, tag = '') {
 
 function scheduleNotif(todo) {
   if (!notifPermission || !todo.dueDate) return;
-  const due = new Date(todo.dueDate).getTime();
-  const now = Date.now();
+
+  const due    = new Date(todo.dueDate).getTime();
+  const now    = Date.now();
   const msLeft = due - now;
 
-  // Clear existing notification timers for this todo
-  ['_warn', '_due'].forEach(suffix => {
-    const key = todo.id + suffix;
-    clearTimeout(notifTimers[key]);
-    delete notifTimers[key];
-  });
+  // Clear any existing timers for this todo
+  clearNotifTimers(todo.id);
 
-  const warnTime = msLeft - (15 * 60 * 1000);
-  if (warnTime > 0) {
+  // 15 minute warning
+  const warnMs = msLeft - (15 * 60 * 1000);
+  if (warnMs > 0) {
     notifTimers[todo.id + '_warn'] = setTimeout(() => {
-      showSWNotification('⚡ AuraithX — Task Reminder', {
-        body: `"${todo.text}" is due in 15 minutes!`,
-        requireInteraction: true
-      }, todo.id + '_warn');
-    }, warnTime);
+      showSWNotification(
+        '⚡ AuraithX — Task Reminder',
+        `"${todo.text}" is due in 15 minutes!`,
+        todo.id + '_warn'
+      );
+    }, warnMs);
   }
-
-  if (msLeft > 0) {
-    notifTimers[todo.id + '_due'] = setTimeout(() => {
-      showSWNotification('🚨 AuraithX — TASK DUE NOW', {
-        body: `"${todo.text}" is due RIGHT NOW!`,
-        requireInteraction: true
-      }, todo.id + '_due');
-    }, msLeft);
-  }
-}
 
   // At due time
   if (msLeft > 0) {
     notifTimers[todo.id + '_due'] = setTimeout(() => {
-      showSWNotification('🚨 AuraithX — TASK DUE NOW', {
-        body: `"${todo.text}" is due RIGHT NOW!`,
-        icon: './To%20do%20list/Icon/launchericon-192x192.png',
-        tag: todo.id + '_due',
-        requireInteraction: true
-      });
+      showSWNotification(
+        '🚨 AuraithX — TASK DUE NOW',
+        `"${todo.text}" is due RIGHT NOW!`,
+        todo.id + '_due'
+      );
     }, msLeft);
   }
+}
+
+function clearNotifTimers(id) {
+  ['_warn', '_due'].forEach(suffix => {
+    const key = id + suffix;
+    clearTimeout(notifTimers[key]);
+    delete notifTimers[key];
+  });
+}
 
 // Check permission on load
 if ('Notification' in window && Notification.permission === 'granted') {
@@ -152,11 +155,37 @@ if ('Notification' in window && Notification.permission === 'granted') {
 }
 
 // =============================================
+//   COUNTDOWN TIMER (live due date display)
+// =============================================
+function startCountdown(todo, dueEl) {
+  // Clear any existing countdown for this todo
+  stopCountdown(todo.id);
+
+  countdownTimers[todo.id] = setInterval(() => {
+    const dueFmt = formatDue(todo.dueDate);
+    if (!dueFmt) { stopCountdown(todo.id); return; }
+    dueEl.className = `task-due ${dueFmt.cls}`;
+    dueEl.textContent = `📅 ${dueFmt.label}`;
+  }, 30000); // update every 30 seconds
+}
+
+function stopCountdown(id) {
+  if (countdownTimers[id]) {
+    clearInterval(countdownTimers[id]);
+    delete countdownTimers[id];
+  }
+}
+
+function stopAllCountdowns() {
+  Object.keys(countdownTimers).forEach(id => stopCountdown(id));
+}
+
+// =============================================
 //   ADD TODO
 // =============================================
 function addTodo() {
   const input = document.getElementById('todo-input');
-  const text = input.value.trim();
+  const text  = input.value.trim();
   if (!text) return;
 
   const priority = document.getElementById('priority-select').value;
@@ -182,16 +211,16 @@ function addTodo() {
   render();
 }
 
-// Enter key
+// Enter key support
 document.getElementById('todo-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') addTodo();
 });
 
 // =============================================
-//   FILTER
+//   FILTER & SEARCH
 // =============================================
 function setFilter(f, btn) {
-  currentFilter = f;
+  currentFilter    = f;
   currentCatFilter = 'all';
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
@@ -200,14 +229,14 @@ function setFilter(f, btn) {
 
 function setCatFilter(cat) {
   currentCatFilter = cat;
-  currentFilter = 'all';
+  currentFilter    = 'all';
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   render();
 }
 
 function getFiltered() {
   const search = (document.getElementById('search-input')?.value || '').toLowerCase();
-  const now = Date.now();
+  const now    = Date.now();
 
   return todos.filter(t => {
     const isOverdue = t.dueDate && !t.completed && new Date(t.dueDate).getTime() < now;
@@ -216,9 +245,9 @@ function getFiltered() {
     if (currentFilter === 'all')     return true;
     if (currentFilter === 'done')    return t.completed;
     if (currentFilter === 'overdue') return isOverdue;
-    if (currentFilter === 'high')    return t.priority === 'high' && !t.completed;
+    if (currentFilter === 'high')    return t.priority === 'high'   && !t.completed;
     if (currentFilter === 'medium')  return t.priority === 'medium' && !t.completed;
-    if (currentFilter === 'low')     return t.priority === 'low' && !t.completed;
+    if (currentFilter === 'low')     return t.priority === 'low'    && !t.completed;
     return true;
   });
 }
@@ -236,10 +265,10 @@ function formatDue(dueDate) {
   const days = Math.floor(diff / 86400000);
 
   let label = '', cls = '';
-  if (diff < 0)       { label = 'OVERDUE';      cls = 'overdue'; }
-  else if (mins < 60) { label = `${mins}m left`; cls = 'soon'; }
-  else if (hrs < 24)  { label = `${hrs}h left`;  cls = 'soon'; }
-  else if (days < 3)  { label = `${days}d left`; cls = 'soon'; }
+  if (diff < 0)       { label = 'OVERDUE';       cls = 'overdue'; }
+  else if (mins < 60) { label = `${mins}m left`;  cls = 'soon'; }
+  else if (hrs  < 24) { label = `${hrs}h left`;   cls = 'soon'; }
+  else if (days < 3)  { label = `${days}d left`;  cls = 'soon'; }
   else {
     label = due.toLocaleDateString('en-GB', { day:'2-digit', month:'short' }) +
             ' ' + due.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
@@ -256,25 +285,19 @@ function createNode(todo) {
 
   // Checkbox
   const checkbox = document.createElement('input');
-  checkbox.type = 'checkbox';
+  checkbox.type    = 'checkbox';
   checkbox.checked = !!todo.completed;
   checkbox.addEventListener('change', () => {
-  todo.completed = checkbox.checked;
-  if (todo.completed) {
-    // Clear notification timers
-    ['_warn', '_due'].forEach(suffix => {
-      const key = todo.id + suffix;
-      clearTimeout(notifTimers[key]);
-      delete notifTimers[key];
-    });
-    // Stop countdown timer
-    stopCountdown(todo.id);
-  } else {
-    scheduleNotif(todo); // restart notifications if unchecked
-  }
-  saveTodos();
-  render();
-});
+    todo.completed = checkbox.checked;
+    if (todo.completed) {
+      clearNotifTimers(todo.id);
+      stopCountdown(todo.id);
+    } else {
+      scheduleNotif(todo);
+    }
+    saveTodos();
+    render();
+  });
 
   // Body
   const body = document.createElement('div');
@@ -282,10 +305,10 @@ function createNode(todo) {
 
   // Text
   const textSpan = document.createElement('div');
-  textSpan.className = 'task-text';
+  textSpan.className   = 'task-text';
   textSpan.textContent = todo.text;
 
-  // Double-click + double-tap to edit (your original code preserved)
+  // Double-click + double-tap to edit
   let lastTap = 0;
   textSpan.addEventListener('dblclick', () => triggerEdit(todo, textSpan));
   textSpan.addEventListener('touchend', e => {
@@ -298,56 +321,52 @@ function createNode(todo) {
     lastTap = now;
   });
 
-  // Meta
+  // Meta row
   const meta = document.createElement('div');
   meta.className = 'task-meta';
 
   const idEl = document.createElement('span');
-  idEl.className = 'task-id';
+  idEl.className   = 'task-id';
   idEl.textContent = todo.id;
 
   const catEl = document.createElement('span');
-  catEl.className = 'task-cat';
+  catEl.className   = 'task-cat';
   catEl.textContent = todo.category || 'General';
 
   meta.appendChild(idEl);
   meta.appendChild(catEl);
 
-if (todo.dueDate) {
-  const dueFmt = formatDue(todo.dueDate);
-  if (dueFmt) {
-    const dueEl = document.createElement('span');
-    dueEl.className = `task-due ${dueFmt.cls}`;
-    dueEl.textContent = `📅 ${dueFmt.label}`;
-    meta.appendChild(dueEl);
-    startCountdown(todo, dueEl); // 👈 START the countdown timer for this todo
+  // Due date with live countdown
+  if (todo.dueDate) {
+    const dueFmt = formatDue(todo.dueDate);
+    if (dueFmt) {
+      const dueEl = document.createElement('span');
+      dueEl.className   = `task-due ${dueFmt.cls}`;
+      dueEl.textContent = `📅 ${dueFmt.label}`;
+      meta.appendChild(dueEl);
+      if (!todo.completed) startCountdown(todo, dueEl);
+    }
   }
-}
 
   body.appendChild(textSpan);
   body.appendChild(meta);
 
-  // Delete button
+  // Delete button — clears countdown AND notification timers
   const delBtn = document.createElement('button');
-  delBtn.className = 'task-del';
+  delBtn.className   = 'task-del';
   delBtn.textContent = 'DEL';
   delBtn.addEventListener('click', () => {
-  li.style.transition = 'opacity 0.2s, transform 0.2s';
-  li.style.opacity = '0';
-  li.style.transform = 'translateX(16px)';
-  setTimeout(() => {
-    // Cleanup: stop countdown + clear notification timers
-    stopCountdown(todo.id);
-    ['_warn', '_due'].forEach(suffix => {
-      const key = todo.id + suffix;
-      clearTimeout(notifTimers[key]);
-      delete notifTimers[key];
-    });
-    todos.splice(todos.indexOf(todo), 1);
-    saveTodos();
-    render();
-  }, 200);
-});
+    li.style.transition = 'opacity 0.2s, transform 0.2s';
+    li.style.opacity    = '0';
+    li.style.transform  = 'translateX(16px)';
+    setTimeout(() => {
+      stopCountdown(todo.id);
+      clearNotifTimers(todo.id);
+      todos.splice(todos.indexOf(todo), 1);
+      saveTodos();
+      render();
+    }, 200);
+  });
 
   const actions = document.createElement('div');
   actions.className = 'task-actions';
@@ -363,7 +382,7 @@ if (todo.dueDate) {
 function triggerEdit(todo, textSpan) {
   const newText = prompt('Edit task:', todo.text);
   if (newText !== null && newText.trim() !== '') {
-    todo.text = newText.trim();
+    todo.text        = newText.trim();
     textSpan.textContent = todo.text;
     saveTodos();
   }
@@ -373,13 +392,16 @@ function triggerEdit(todo, textSpan) {
 //   RENDER
 // =============================================
 function render() {
-  const list = document.getElementById('todo-list');
+  // Stop all countdowns before re-rendering
+  stopAllCountdowns();
+
+  const list     = document.getElementById('todo-list');
   const filtered = getFiltered();
   list.innerHTML = '';
 
   if (filtered.length === 0) {
-    const empty = document.createElement('div');
-    empty.className = 'empty-state';
+    const empty       = document.createElement('div');
+    empty.className   = 'empty-state';
     empty.textContent = '// NO TASKS MATCH CURRENT FILTER';
     list.appendChild(empty);
   } else {
@@ -395,7 +417,7 @@ function render() {
 //   STATS
 // =============================================
 function updateStats() {
-  const now = Date.now();
+  const now     = Date.now();
   const total   = todos.length;
   const done    = todos.filter(t => t.completed).length;
   const overdue = todos.filter(t => t.dueDate && !t.completed && new Date(t.dueDate).getTime() < now).length;
@@ -408,24 +430,24 @@ function updateStats() {
 }
 
 // =============================================
-//   CATEGORY SIDEBAR LIST
+//   CATEGORY SIDEBAR
 // =============================================
 function updateCatList() {
-  const cats = [...new Set(todos.map(t => t.category || 'General'))];
+  const cats      = [...new Set(todos.map(t => t.category || 'General'))];
   const container = document.getElementById('cat-list');
   container.innerHTML = '';
 
-  const allBtn = document.createElement('button');
-  allBtn.className = 'filter-btn' + (currentCatFilter === 'all' ? ' active' : '');
+  const allBtn       = document.createElement('button');
+  allBtn.className   = 'filter-btn' + (currentCatFilter === 'all' ? ' active' : '');
   allBtn.textContent = 'ALL';
-  allBtn.onclick = () => setCatFilter('all');
+  allBtn.onclick     = () => setCatFilter('all');
   container.appendChild(allBtn);
 
   cats.forEach(cat => {
-    const btn = document.createElement('button');
-    btn.className = 'filter-btn' + (currentCatFilter === cat ? ' active' : '');
+    const btn       = document.createElement('button');
+    btn.className   = 'filter-btn' + (currentCatFilter === cat ? ' active' : '');
     btn.textContent = cat;
-    btn.onclick = () => setCatFilter(cat);
+    btn.onclick     = () => setCatFilter(cat);
     container.appendChild(btn);
   });
 }
@@ -442,13 +464,11 @@ function updateAnalytics() {
   const pending = todos.filter(t => !t.completed).length;
   const withDue = todos.filter(t => t.dueDate).length;
 
-  // Completion bar
   const bar = document.getElementById('ana-bar');
   const pct = document.getElementById('ana-pct');
   if (bar) bar.style.width = rate + '%';
   if (pct) pct.textContent = rate + '%';
 
-  // Priority chart
   const priChart = document.getElementById('priority-chart');
   if (priChart) {
     const high   = todos.filter(t => t.priority === 'high').length;
@@ -459,22 +479,20 @@ function updateAnalytics() {
       { label: '🔴 HIGH',   count: high,   color: '#ff3c5a' },
       { label: '🟡 MEDIUM', count: medium, color: '#ffd93d' },
       { label: '🟢 LOW',    count: low,    color: '#00ff88' }
-    ].map(item => `
+    ].map(i => `
       <div class="chart-row">
-        <div class="chart-label">${item.label}</div>
+        <div class="chart-label">${i.label}</div>
         <div class="chart-bar-wrap">
-          <div class="chart-bar" style="width:${(item.count/max)*100}%;background:${item.color}"></div>
+          <div class="chart-bar" style="width:${(i.count/max)*100}%;background:${i.color}"></div>
         </div>
-        <div class="chart-count">${item.count}</div>
-      </div>
-    `).join('');
+        <div class="chart-count">${i.count}</div>
+      </div>`).join('');
   }
 
-  // Category chart
   const catChart = document.getElementById('cat-chart');
   if (catChart) {
-    const cats = {};
-    todos.forEach(t => { const c = t.category || 'General'; cats[c] = (cats[c] || 0) + 1; });
+    const cats   = {};
+    todos.forEach(t => { const c = t.category || 'General'; cats[c] = (cats[c]||0)+1; });
     const maxCat = Math.max(...Object.values(cats), 1);
     catChart.innerHTML = Object.entries(cats).map(([cat, count]) => `
       <div class="chart-row">
@@ -483,11 +501,9 @@ function updateAnalytics() {
           <div class="chart-bar" style="width:${(count/maxCat)*100}%;background:var(--cyan)"></div>
         </div>
         <div class="chart-count">${count}</div>
-      </div>
-    `).join('');
+      </div>`).join('');
   }
 
-  // Quick stats
   const qs = document.getElementById('quick-stats');
   if (qs) {
     qs.innerHTML = [
@@ -501,8 +517,7 @@ function updateAnalytics() {
       <div class="qs-item">
         <div class="qs-label">${s.label}</div>
         <div class="qs-value">${s.value}</div>
-      </div>
-    `).join('');
+      </div>`).join('');
   }
 }
 
@@ -520,19 +535,18 @@ function switchView(view) {
 }
 
 // =============================================
-//   SIDEBAR TOGGLE
+//   SIDEBAR (works on both mobile & desktop)
 // =============================================
 function openSidebar() {
   const sb = document.getElementById('sidebar');
   const mn = document.getElementById('main');
   const bd = document.querySelector('.sidebar-backdrop');
-  if (window.innerWidth <= 640) {
+  if (window.innerWidth <= 768) {
     sb.classList.add('open');
     if (bd) bd.classList.add('show');
   } else {
     sb.classList.remove('hidden');
     mn.classList.remove('full');
-    if (bd) bd.classList.remove('show');
   }
 }
 
@@ -540,24 +554,24 @@ function closeSidebar() {
   const sb = document.getElementById('sidebar');
   const mn = document.getElementById('main');
   const bd = document.querySelector('.sidebar-backdrop');
-  if (window.innerWidth <= 640) {
-    sb.classList.remove('open');
-    if (bd) bd.classList.remove('show');
-  } else {
+  sb.classList.remove('open');
+  if (bd) bd.classList.remove('show');
+  if (window.innerWidth > 768) {
     sb.classList.add('hidden');
     mn.classList.add('full');
-    if (bd) bd.classList.remove('show');
   }
 }
 
 function toggleSidebar() {
-  const sb = document.getElementById('sidebar');
-  const isOpen = window.innerWidth <= 640 ? sb.classList.contains('open') : !sb.classList.contains('hidden');
+  const sb     = document.getElementById('sidebar');
+  const isOpen = window.innerWidth <= 768
+    ? sb.classList.contains('open')
+    : !sb.classList.contains('hidden');
   isOpen ? closeSidebar() : openSidebar();
 }
 
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSidebar(); });
-
+// Close sidebar on Escape key
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
 
 // =============================================
 //   INIT
