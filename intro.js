@@ -1,29 +1,21 @@
 // =============================================
-//   AuraithX — High-Tech Welcome Intro
-//   Fixed version — works on Desktop, Android, iOS
+//   AuraithX Task OS — intro.js v2.0
+//   Works on Desktop, Android, iOS
 // =============================================
 
 document.addEventListener('DOMContentLoaded', function () {
 
-  // ---- Inject Styles ----
   const style = document.createElement('style');
   style.textContent = `
     #ax-intro {
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
+      position: fixed; inset: 0; z-index: 9999;
       background: #040812;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      font-family: 'Orbitron', monospace;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      overflow: hidden; font-family: 'Orbitron', monospace;
     }
     #ax-intro::before {
-      content: '';
-      position: absolute;
-      inset: 0;
+      content: ''; position: absolute; inset: 0;
       background-image:
         linear-gradient(rgba(0,245,255,0.04) 1px, transparent 1px),
         linear-gradient(90deg, rgba(0,245,255,0.04) 1px, transparent 1px);
@@ -37,9 +29,7 @@ document.addEventListener('DOMContentLoaded', function () {
       100% { opacity: 0; }
     }
     #ax-intro::after {
-      content: '';
-      position: absolute;
-      inset: 0;
+      content: ''; position: absolute; inset: 0;
       background: repeating-linear-gradient(
         0deg, transparent, transparent 2px,
         rgba(0,0,0,0.1) 2px, rgba(0,0,0,0.1) 4px
@@ -47,11 +37,8 @@ document.addEventListener('DOMContentLoaded', function () {
       pointer-events: none;
     }
     .ax-corner {
-      position: absolute;
-      width: 32px;
-      height: 32px;
-      opacity: 0;
-      animation: ax-corner-in 0.5s ease forwards;
+      position: absolute; width: 32px; height: 32px;
+      opacity: 0; animation: ax-corner-in 0.5s ease forwards;
     }
     .ax-corner.tl { top:24px; left:24px; border-top:2px solid #00f5ff; border-left:2px solid #00f5ff; animation-delay:0.1s; }
     .ax-corner.tr { top:24px; right:24px; border-top:2px solid #00f5ff; border-right:2px solid #00f5ff; animation-delay:0.2s; }
@@ -62,16 +49,11 @@ document.addEventListener('DOMContentLoaded', function () {
       to   { opacity:1; transform:scale(1); }
     }
     .ax-center {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      z-index: 2;
+      position: relative; display: flex;
+      flex-direction: column; align-items: center; z-index: 2;
     }
     .ax-ring {
-      width: 120px;
-      height: 120px;
-      position: relative;
+      width: 120px; height: 120px; position: relative;
       margin-bottom: 28px;
       animation: ax-ring-in 0.6s ease 0.3s both;
     }
@@ -79,29 +61,16 @@ document.addEventListener('DOMContentLoaded', function () {
       from { opacity:0; transform:scale(0.4) rotate(-90deg); }
       to   { opacity:1; transform:scale(1) rotate(0deg); }
     }
-    .ax-ring svg {
-      width: 100%;
-      height: 100%;
-      animation: ax-ring-spin 8s linear infinite;
-    }
-    @keyframes ax-ring-spin {
-      from { transform: rotate(0deg); }
-      to   { transform: rotate(360deg); }
-    }
+    .ax-ring svg { width:100%; height:100%; animation: ax-ring-spin 8s linear infinite; }
+    @keyframes ax-ring-spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
     .ax-ring-inner {
-      position: absolute;
-      inset: 20px;
-      border-radius: 50%;
+      position: absolute; inset: 20px; border-radius: 50%;
       border: 1px solid rgba(0,245,255,0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       animation: ax-ring-spin 4s linear infinite reverse;
     }
     .ax-ring-core {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
+      width: 36px; height: 36px; border-radius: 50%;
       background: radial-gradient(circle, rgba(0,245,255,0.9) 0%, rgba(0,245,255,0.1) 60%, transparent 100%);
       box-shadow: 0 0 20px rgba(0,245,255,0.8), 0 0 40px rgba(0,245,255,0.4);
       animation: ax-core-pulse 1.5s ease-in-out infinite;
@@ -113,12 +82,10 @@ document.addEventListener('DOMContentLoaded', function () {
     .ax-brand {
       font-family: 'Orbitron', monospace;
       font-size: clamp(1.8rem, 6vw, 3rem);
-      font-weight: 900;
-      letter-spacing: 8px;
+      font-weight: 900; letter-spacing: 8px;
       color: #00f5ff;
       text-shadow: 0 0 30px rgba(0,245,255,0.7), 0 0 60px rgba(0,245,255,0.3);
-      opacity: 0;
-      animation: ax-brand-in 0.7s ease 0.8s forwards;
+      opacity: 0; animation: ax-brand-in 0.7s ease 0.8s forwards;
       text-transform: uppercase;
     }
     @keyframes ax-brand-in {
@@ -128,20 +95,22 @@ document.addEventListener('DOMContentLoaded', function () {
     .ax-sub {
       font-family: 'Share Tech Mono', monospace;
       font-size: clamp(0.55rem, 2vw, 0.7rem);
-      letter-spacing: 5px;
-      color: #b042ff;
-      text-transform: uppercase;
-      margin-top: 8px;
-      opacity: 0;
-      animation: ax-fade-up 0.6s ease 1.3s forwards;
+      letter-spacing: 5px; color: #b042ff;
+      text-transform: uppercase; margin-top: 8px;
+      opacity: 0; animation: ax-fade-up 0.6s ease 1.3s forwards;
+    }
+    .ax-ver {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 0.6rem; letter-spacing: 3px;
+      color: rgba(0,245,255,0.35); margin-top: 4px;
+      opacity: 0; animation: ax-fade-up 0.6s ease 1.45s forwards;
     }
     @keyframes ax-fade-up {
       from { opacity:0; transform:translateY(10px); }
       to   { opacity:1; transform:translateY(0); }
     }
     .ax-divider {
-      width: 0;
-      height: 1px;
+      width: 0; height: 1px;
       background: linear-gradient(90deg, transparent, #00f5ff, transparent);
       margin: 20px 0;
       animation: ax-line-grow 0.8s ease 1.5s forwards;
@@ -153,65 +122,44 @@ document.addEventListener('DOMContentLoaded', function () {
     .ax-boot {
       font-family: 'Share Tech Mono', monospace;
       font-size: clamp(0.6rem, 2vw, 0.72rem);
-      color: rgba(0,245,255,0.5);
-      letter-spacing: 2px;
-      min-height: 1.2em;
-      text-align: center;
-      opacity: 0;
-      animation: ax-fade-up 0.4s ease 1.8s forwards;
+      color: rgba(0,245,255,0.5); letter-spacing: 2px;
+      min-height: 1.2em; text-align: center;
+      opacity: 0; animation: ax-fade-up 0.4s ease 1.8s forwards;
     }
     .ax-progress-wrap {
-      width: 240px;
-      height: 2px;
+      width: 240px; height: 2px;
       background: rgba(0,245,255,0.1);
-      border-radius: 2px;
-      margin-top: 16px;
+      border-radius: 2px; margin-top: 16px;
       overflow: hidden;
-      opacity: 0;
-      animation: ax-fade-up 0.4s ease 1.9s forwards;
+      opacity: 0; animation: ax-fade-up 0.4s ease 1.9s forwards;
     }
     .ax-progress-bar {
-      height: 100%;
-      width: 0%;
+      height: 100%; width: 0%;
       background: linear-gradient(90deg, #b042ff, #00f5ff);
       border-radius: 2px;
       box-shadow: 0 0 8px rgba(0,245,255,0.6);
       transition: width 0.12s linear;
     }
     .ax-tags {
-      display: flex;
-      gap: 12px;
-      margin-top: 20px;
-      opacity: 0;
-      animation: ax-fade-up 0.4s ease 2s forwards;
+      display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap;
+      justify-content: center;
+      opacity: 0; animation: ax-fade-up 0.4s ease 2s forwards;
     }
     .ax-tag {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 0.55rem;
-      letter-spacing: 2px;
+      font-size: 0.55rem; letter-spacing: 2px;
       padding: 4px 10px;
       border: 1px solid rgba(0,245,255,0.2);
-      border-radius: 2px;
-      color: rgba(0,245,255,0.4);
+      border-radius: 2px; color: rgba(0,245,255,0.4);
       text-transform: uppercase;
     }
     .ax-flash {
-      position: absolute;
-      inset: 0;
-      background: #00f5ff;
-      opacity: 0;
-      pointer-events: none;
+      position: absolute; inset: 0;
+      background: #00f5ff; opacity: 0; pointer-events: none;
     }
-    .ax-flash.active {
-      animation: ax-flash-out 0.5s ease forwards;
-    }
-    @keyframes ax-flash-out {
-      0%   { opacity: 0.6; }
-      100% { opacity: 0; }
-    }
-    #ax-intro.ax-exit {
-      animation: ax-intro-exit 0.6s ease forwards;
-    }
+    .ax-flash.active { animation: ax-flash-out 0.5s ease forwards; }
+    @keyframes ax-flash-out { 0%{opacity:0.6} 100%{opacity:0} }
+    #ax-intro.ax-exit { animation: ax-intro-exit 0.6s ease forwards; }
     @keyframes ax-intro-exit {
       0%   { opacity:1; transform:scale(1); }
       40%  { opacity:1; transform:scale(1.03); }
@@ -220,7 +168,6 @@ document.addEventListener('DOMContentLoaded', function () {
   `;
   document.head.appendChild(style);
 
-  // ---- Build DOM ----
   const overlay = document.createElement('div');
   overlay.id = 'ax-intro';
   overlay.innerHTML = `
@@ -247,12 +194,11 @@ document.addEventListener('DOMContentLoaded', function () {
             </linearGradient>
           </defs>
         </svg>
-        <div class="ax-ring-inner">
-          <div class="ax-ring-core"></div>
-        </div>
+        <div class="ax-ring-inner"><div class="ax-ring-core"></div></div>
       </div>
       <div class="ax-brand">AuraithX</div>
-      <div class="ax-sub">Task Management System</div>
+      <div class="ax-sub">Task Operating System</div>
+      <div class="ax-ver">v2.0.0 // FULL RELEASE</div>
       <div class="ax-divider"></div>
       <div class="ax-boot" id="ax-boot-text">INITIALIZING...</div>
       <div class="ax-progress-wrap">
@@ -261,6 +207,8 @@ document.addEventListener('DOMContentLoaded', function () {
       <div class="ax-tags">
         <div class="ax-tag">PWA</div>
         <div class="ax-tag">Offline</div>
+        <div class="ax-tag">Notifications</div>
+        <div class="ax-tag">Analytics</div>
         <div class="ax-tag">v2.0.0</div>
       </div>
     </div>
@@ -269,11 +217,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
   document.body.appendChild(overlay);
 
-  // ---- Boot sequence ----
   const bootLines = [
     'INITIALIZING SYSTEM...',
-    'LOADING MODULES...',
-    'CONNECTING LOCAL STORAGE...',
+    'LOADING TASK ENGINE...',
+    'MOUNTING ANALYTICS...',
+    'ENABLING NOTIFICATIONS...',
     'CALIBRATING INTERFACE...',
     'SYSTEM READY'
   ];
