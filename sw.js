@@ -1,4 +1,9 @@
+// =============================================
+//   AuraithX Task OS — Service Worker v2.0
+// =============================================
+
 const CACHE_NAME = 'auraithx-todo-v2';
+
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -10,29 +15,44 @@ const ASSETS_TO_CACHE = [
   './To%20do%20list/Icon/launchericon-512x512.png'
 ];
 
-self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE)));
+// INSTALL
+self.addEventListener('install', event => {
+  console.log('[AuraithX SW] Installing v2...');
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => {
+      console.log('[AuraithX SW] Caching assets');
+      return cache.addAll(ASSETS_TO_CACHE);
+    })
+  );
   self.skipWaiting();
 });
 
-self.addEventListener('activate', (event) => {
+// ACTIVATE — delete old caches
+self.addEventListener('activate', event => {
+  console.log('[AuraithX SW] Activating v2...');
   event.waitUntil(
-    caches.keys().then((names) =>
-      Promise.all(names.filter((n) => n !== CACHE_NAME).map((n) => caches.delete(n)))
+    caches.keys().then(keys =>
+      Promise.all(
+        keys.filter(k => k !== CACHE_NAME).map(k => {
+          console.log('[AuraithX SW] Deleting old cache:', k);
+          return caches.delete(k);
+        })
+      )
     )
   );
   self.clients.claim();
 });
 
-self.addEventListener('fetch', (event) => {
+// FETCH — cache first, fallback to network
+self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request).then((cached) => {
+    caches.match(event.request).then(cached => {
       if (cached) return cached;
-      return fetch(event.request).then((res) => {
-        if (!res || res.status !== 200 || res.type !== 'basic') return res;
-        const clone = res.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-        return res;
+      return fetch(event.request).then(response => {
+        if (!response || response.status !== 200 || response.type !== 'basic') return response;
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        return response;
       });
     }).catch(() => {
       if (event.request.destination === 'document') return caches.match('./index.html');
