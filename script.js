@@ -78,6 +78,21 @@ function requestNotifPermission() {
 function scheduleAllNotifs() {
   Object.values(notifTimers).forEach(clearTimeout);
   notifTimers = {};
+  let countdownTimers = new Map();
+
+function showSWNotification(title, options = {}, tag = '') {
+  if (!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.ready
+    .then((reg) => {
+      reg.showNotification(title, {
+        tag,
+        icon: './To%20do%20list/Icon/launchericon-192x192.png',
+        badge: './To%20do%20list/Icon/launchericon-192x192.png',
+        ...options
+      });
+    })
+    .catch(console.error);
+}
   todos.forEach(todo => {
     if (!todo.completed && todo.dueDate) scheduleNotif(todo);
   });
@@ -89,23 +104,37 @@ function scheduleNotif(todo) {
   const now = Date.now();
   const msLeft = due - now;
 
-  // 15 min warning
+  // Clear existing notification timers for this todo
+  ['_warn', '_due'].forEach(suffix => {
+    const key = todo.id + suffix;
+    clearTimeout(notifTimers[key]);
+    delete notifTimers[key];
+  });
+
   const warnTime = msLeft - (15 * 60 * 1000);
   if (warnTime > 0) {
     notifTimers[todo.id + '_warn'] = setTimeout(() => {
-      new Notification('⚡ AuraithX — Task Reminder', {
+      showSWNotification('⚡ AuraithX — Task Reminder', {
         body: `"${todo.text}" is due in 15 minutes!`,
-        icon: './To%20do%20list/Icon/launchericon-192x192.png',
-        tag: todo.id + '_warn',
         requireInteraction: true
-      });
+      }, todo.id + '_warn');
     }, warnTime);
   }
+
+  if (msLeft > 0) {
+    notifTimers[todo.id + '_due'] = setTimeout(() => {
+      showSWNotification('🚨 AuraithX — TASK DUE NOW', {
+        body: `"${todo.text}" is due RIGHT NOW!`,
+        requireInteraction: true
+      }, todo.id + '_due');
+    }, msLeft);
+  }
+}
 
   // At due time
   if (msLeft > 0) {
     notifTimers[todo.id + '_due'] = setTimeout(() => {
-      new Notification('🚨 AuraithX — TASK DUE NOW', {
+      showSWNotification('🚨 AuraithX — TASK DUE NOW', {
         body: `"${todo.text}" is due RIGHT NOW!`,
         icon: './To%20do%20list/Icon/launchericon-192x192.png',
         tag: todo.id + '_due',
@@ -113,7 +142,6 @@ function scheduleNotif(todo) {
       });
     }, msLeft);
   }
-}
 
 // Check permission on load
 if ('Notification' in window && Notification.permission === 'granted') {
@@ -231,14 +259,22 @@ function createNode(todo) {
   checkbox.type = 'checkbox';
   checkbox.checked = !!todo.completed;
   checkbox.addEventListener('change', () => {
-    todo.completed = checkbox.checked;
-    if (todo.completed) {
-      clearTimeout(notifTimers[todo.id + '_warn']);
-      clearTimeout(notifTimers[todo.id + '_due']);
-    }
-    saveTodos();
-    render();
-  });
+  todo.completed = checkbox.checked;
+  if (todo.completed) {
+    // Clear notification timers
+    ['_warn', '_due'].forEach(suffix => {
+      const key = todo.id + suffix;
+      clearTimeout(notifTimers[key]);
+      delete notifTimers[key];
+    });
+    // Stop countdown timer
+    stopCountdown(todo.id);
+  } else {
+    scheduleNotif(todo); // restart notifications if unchecked
+  }
+  saveTodos();
+  render();
+});
 
   // Body
   const body = document.createElement('div');
@@ -277,15 +313,16 @@ function createNode(todo) {
   meta.appendChild(idEl);
   meta.appendChild(catEl);
 
-  if (todo.dueDate) {
-    const dueFmt = formatDue(todo.dueDate);
-    if (dueFmt) {
-      const dueEl = document.createElement('span');
-      dueEl.className = `task-due ${dueFmt.cls}`;
-      dueEl.textContent = `📅 ${dueFmt.label}`;
-      meta.appendChild(dueEl);
-    }
+if (todo.dueDate) {
+  const dueFmt = formatDue(todo.dueDate);
+  if (dueFmt) {
+    const dueEl = document.createElement('span');
+    dueEl.className = `task-due ${dueFmt.cls}`;
+    dueEl.textContent = `📅 ${dueFmt.label}`;
+    meta.appendChild(dueEl);
+    startCountdown(todo, dueEl); // 👈 START the countdown timer for this todo
   }
+}
 
   body.appendChild(textSpan);
   body.appendChild(meta);
@@ -295,15 +332,22 @@ function createNode(todo) {
   delBtn.className = 'task-del';
   delBtn.textContent = 'DEL';
   delBtn.addEventListener('click', () => {
-    li.style.transition = 'opacity 0.2s, transform 0.2s';
-    li.style.opacity = '0';
-    li.style.transform = 'translateX(16px)';
-    setTimeout(() => {
-      todos.splice(todos.indexOf(todo), 1);
-      saveTodos();
-      render();
-    }, 200);
-  });
+  li.style.transition = 'opacity 0.2s, transform 0.2s';
+  li.style.opacity = '0';
+  li.style.transform = 'translateX(16px)';
+  setTimeout(() => {
+    // Cleanup: stop countdown + clear notification timers
+    stopCountdown(todo.id);
+    ['_warn', '_due'].forEach(suffix => {
+      const key = todo.id + suffix;
+      clearTimeout(notifTimers[key]);
+      delete notifTimers[key];
+    });
+    todos.splice(todos.indexOf(todo), 1);
+    saveTodos();
+    render();
+  }, 200);
+});
 
   const actions = document.createElement('div');
   actions.className = 'task-actions';
@@ -478,16 +522,42 @@ function switchView(view) {
 // =============================================
 //   SIDEBAR TOGGLE
 // =============================================
-function toggleSidebar() {
+function openSidebar() {
   const sb = document.getElementById('sidebar');
   const mn = document.getElementById('main');
+  const bd = document.querySelector('.sidebar-backdrop');
   if (window.innerWidth <= 640) {
-    sb.classList.toggle('open');
+    sb.classList.add('open');
+    if (bd) bd.classList.add('show');
   } else {
-    sb.classList.toggle('hidden');
-    mn.classList.toggle('full');
+    sb.classList.remove('hidden');
+    mn.classList.remove('full');
+    if (bd) bd.classList.remove('show');
   }
 }
+
+function closeSidebar() {
+  const sb = document.getElementById('sidebar');
+  const mn = document.getElementById('main');
+  const bd = document.querySelector('.sidebar-backdrop');
+  if (window.innerWidth <= 640) {
+    sb.classList.remove('open');
+    if (bd) bd.classList.remove('show');
+  } else {
+    sb.classList.add('hidden');
+    mn.classList.add('full');
+    if (bd) bd.classList.remove('show');
+  }
+}
+
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const isOpen = window.innerWidth <= 640 ? sb.classList.contains('open') : !sb.classList.contains('hidden');
+  isOpen ? closeSidebar() : openSidebar();
+}
+
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSidebar(); });
+
 
 // =============================================
 //   INIT
