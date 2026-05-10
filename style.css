@@ -217,6 +217,64 @@ body > * { position: relative; z-index: 1; }
   letter-spacing: 1px;
 }
 
+/* ======== SIDEBAR CLOSE BUTTON ======== */
+.sidebar-close {
+  display: none;
+  position: absolute;
+  top: 14px;
+  right: 12px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-mid);
+  font-size: 0.9rem;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 10;
+}
+.sidebar-close:hover { color: var(--cyan); border-color: var(--cyan); }
+
+/* ======== SIDEBAR BACKDROP (mobile) ======== */
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 99;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.sidebar-backdrop.show {
+  display: block;
+  opacity: 1;
+}
+
+/* ======== MOBILE OVERRIDES ======== */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 240px;
+    transform: translateX(-100%);
+    z-index: 200;
+  }
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+  }
+  .sidebar-close { display: block; }
+  .main { margin-left: 0 !important; }
+  .add-meta { flex-direction: column; }
+  .add-meta select,
+  .add-meta input[type="datetime-local"] { width: 100%; }
+  #add-btn { width: 100%; margin-left: 0; }
+  .analytics-grid { grid-template-columns: 1fr; }
+  .ana-card.wide { grid-column: 1; }
+  .topbar-right .notif-btn { font-size: 0.55rem; padding: 4px 7px; }
+  .clock { display: none; }
+}
+
+
+
 /* ======== MAIN ======== */
 .main {
   margin-left: var(--sidebar-w);
