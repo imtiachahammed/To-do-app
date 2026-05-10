@@ -1,64 +1,163 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AuraithX // Todo System</title>
-
-    <!-- PWA META TAGS -->
-    <meta name="description" content="A smart daily todo list powered by AuraithX">
-    <meta name="theme-color" content="#00f5ff">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="AuraithX Todo">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="To%20do%20list/Icon/launchericon-192x192.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="To%20do%20list/Icon/launchericon-192x192.png">
-
-    <!-- Fonts (needed by intro.js too) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet">
-
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AuraithX // Task OS v2.0</title>
+  <meta name="description" content="AuraithX Task Operating System — Smart todo with analytics and notifications">
+  <meta name="theme-color" content="#00f5ff">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="AuraithX OS">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="To%20do%20list/Icon/launchericon-192x192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="To%20do%20list/Icon/launchericon-192x192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="header-bar"></div>
-    <h1>AuraithX</h1>
-    <h2>Task Management System</h2>
-    <p>Double-click any task to edit. Enter to add.</p>
-
-    <div class="status-badge">
-      <div class="status-dot"></div>
-      SYSTEM ONLINE // LOCAL STORAGE ACTIVE
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-ring"></div>
+      <span class="logo-text">AuraithX</span>
     </div>
 
-    <div class="input-row">
-      <input type="text" id="todo-input" placeholder="// Enter new task..." autocomplete="off">
-      <button id="add-btn">+ ADD</button>
+    <nav class="sidebar-nav">
+      <button class="nav-btn active" data-view="tasks" onclick="switchView('tasks')">
+        <span class="nav-icon">⬡</span> TASKS
+      </button>
+      <button class="nav-btn" data-view="analytics" onclick="switchView('analytics')">
+        <span class="nav-icon">◈</span> ANALYTICS
+      </button>
+    </nav>
+
+    <div class="sidebar-filters">
+      <div class="filter-label">// FILTER</div>
+      <button class="filter-btn active" onclick="setFilter('all',this)">ALL</button>
+      <button class="filter-btn" onclick="setFilter('high',this)">🔴 HIGH</button>
+      <button class="filter-btn" onclick="setFilter('medium',this)">🟡 MEDIUM</button>
+      <button class="filter-btn" onclick="setFilter('low',this)">🟢 LOW</button>
+      <button class="filter-btn" onclick="setFilter('done',this)">✓ DONE</button>
+      <button class="filter-btn" onclick="setFilter('overdue',this)">⚠ OVERDUE</button>
     </div>
 
-    <ol id="todo-list"></ol>
-
-    <div class="footer-line">
-      POWERED BY <span>AURAITHX</span> // v2.0.0
+    <div class="sidebar-cats">
+      <div class="filter-label">// CATEGORY</div>
+      <div id="cat-list"></div>
     </div>
 
- <script src="intro.js"></script>
-    <script src="script.js"></script>
+    <div class="sidebar-status">
+      <div class="status-dot-wrap">
+        <div class="status-dot"></div>
+        <span>SYSTEM ONLINE</span>
+      </div>
+      <div class="ver-tag">v2.0.0</div>
+    </div>
+  </aside>
 
-    <!-- Service Worker -->
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('[AuraithX] SW registered:', reg.scope))
-            .catch(err => console.error('[AuraithX] SW failed:', err));
-        });
-      }
-    </script>
+  <!-- ===== MAIN ===== -->
+  <main class="main" id="main">
+    <header class="topbar">
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-title" id="view-title">TASK_QUEUE</div>
+      <div class="topbar-right">
+        <div class="notif-btn" id="notif-btn" onclick="requestNotifPermission()">🔔 ENABLE ALERTS</div>
+        <div class="clock" id="clock"></div>
+      </div>
+    </header>
+
+    <!-- ===== TASKS VIEW ===== -->
+    <section class="view active" id="view-tasks">
+
+      <!-- Add Task Panel -->
+      <div class="add-panel">
+        <div class="add-panel-title">// NEW_TASK</div>
+        <div class="add-row">
+          <input type="text" id="todo-input" placeholder="// Enter new task..." autocomplete="off">
+        </div>
+        <div class="add-meta">
+          <select id="priority-select">
+            <option value="medium">🟡 MEDIUM</option>
+            <option value="high">🔴 HIGH</option>
+            <option value="low">🟢 LOW</option>
+          </select>
+          <select id="cat-select">
+            <option value="General">General</option>
+            <option value="Work">Work</option>
+            <option value="Personal">Personal</option>
+            <!-- <option value="AuraithX">AuraithX</option> -->
+            <!-- <option value="S.S Pay">S.S Pay</option> -->
+            <!-- <option value="Vesper Lusso">Vesper Lusso</option> -->
+          </select>
+          <input type="datetime-local" id="due-date">
+          <button id="add-btn" onclick="addTodo()">+ ADD</button>
+        </div>
+      </div>
+
+      <!-- Stats Bar -->
+      <div class="stats-bar">
+        <div class="stat-pill"><span class="stat-num" id="s-total">0</span><span class="stat-lbl">TOTAL</span></div>
+        <div class="stat-pill"><span class="stat-num" id="s-done">0</span><span class="stat-lbl">DONE</span></div>
+        <div class="stat-pill overdue-pill"><span class="stat-num" id="s-overdue">0</span><span class="stat-lbl">OVERDUE</span></div>
+        <div class="stat-pill"><span class="stat-num" id="s-rate">0%</span><span class="stat-lbl">RATE</span></div>
+      </div>
+
+      <!-- Task List -->
+      <div class="task-list-wrap">
+        <div class="tl-header">
+          <span>[ TASK_QUEUE ]</span>
+          <input type="text" id="search-input" placeholder="🔍 search..." oninput="render()">
+        </div>
+        <ol id="todo-list"></ol>
+      </div>
+
+    </section>
+
+    <!-- ===== ANALYTICS VIEW ===== -->
+    <section class="view" id="view-analytics">
+      <div class="analytics-grid">
+
+        <div class="ana-card wide">
+          <div class="ana-card-title">// COMPLETION_RATE</div>
+          <div class="completion-bar-wrap"><div class="completion-bar" id="ana-bar"></div></div>
+          <div class="completion-pct" id="ana-pct">0%</div>
+        </div>
+
+        <div class="ana-card">
+          <div class="ana-card-title">// PRIORITY_BREAKDOWN</div>
+          <div id="priority-chart"></div>
+        </div>
+
+        <div class="ana-card">
+          <div class="ana-card-title">// CATEGORY_BREAKDOWN</div>
+          <div id="cat-chart"></div>
+        </div>
+
+        <div class="ana-card wide">
+          <div class="ana-card-title">// QUICK_STATS</div>
+          <div class="quick-stats" id="quick-stats"></div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+  <script src="intro.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(r => console.log('[AuraithX] SW:', r.scope))
+          .catch(e => console.error('[AuraithX] SW fail:', e));
+      });
+    }
+  </script>
 
 </body>
 </html>
