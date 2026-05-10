@@ -1,5 +1,5 @@
 // =============================================
-//   AuraithX Task OS — Service Worker v2.0
+//   AuraithX Task OS — Service Worker v2.1
 // =============================================
 
 const CACHE_NAME = 'auraithx-todo-v2';
@@ -17,26 +17,20 @@ const ASSETS_TO_CACHE = [
 
 // INSTALL
 self.addEventListener('install', event => {
-  console.log('[AuraithX SW] Installing v2...');
+  console.log('[AuraithX SW] Installing v2.1...');
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      console.log('[AuraithX SW] Caching assets');
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS_TO_CACHE))
   );
   self.skipWaiting();
 });
 
 // ACTIVATE — delete old caches
 self.addEventListener('activate', event => {
-  console.log('[AuraithX SW] Activating v2...');
+  console.log('[AuraithX SW] Activating v2.1...');
   event.waitUntil(
     caches.keys().then(keys =>
       Promise.all(
-        keys.filter(k => k !== CACHE_NAME).map(k => {
-          console.log('[AuraithX SW] Deleting old cache:', k);
-          return caches.delete(k);
-        })
+        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
       )
     )
   );
@@ -58,4 +52,35 @@ self.addEventListener('fetch', event => {
       if (event.request.destination === 'document') return caches.match('./index.html');
     })
   );
+});
+
+// NOTIFICATION CLICK
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // Try to focus existing app window
+      for (const client of clientList) {
+        const url = client.url || '';
+        if (url.includes('/To-do-app/') && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      // Otherwise open the app
+      return clients.openWindow('/To-do-app/index.html');
+    })
+  );
+});
+
+// ALLOW PAGE TO TRIGGER NOTIFICATIONS (RELIABLE ON ANDROID PWA)
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SHOW_NOTIFICATION') {
+    const { title, options, tag } = event.data;
+    self.registration.showNotification(title, {
+      tag,
+      icon: './To%20do%20list/Icon/launchericon-192x192.png',
+      badge: './To%20do%20list/Icon/launchericon-192x192.png',
+      ...options
+    });
+  }
 });
